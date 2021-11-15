@@ -1,6 +1,6 @@
 # Add Imports
 from os import X_OK
-from sklearn.linear_model import LassoCV
+from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,11 +22,12 @@ def create_model(dataset,le_labels):
     X_test= test.drop('Actual',axis=1)
 
     # Create Model
-    model = LassoCV()
+    model = LinearRegression()
 
     # Fit Model
     model.fit(X_train,y_train)
 
+    
     # Model Score
     r_sq = model.score(X_test, y_test)
     print('coefficient of determination:', r_sq)
@@ -35,11 +36,13 @@ def create_model(dataset,le_labels):
 
     # Predict
     y_pred = model.predict(X_test)
-    # print('predicted response:', y_pred, sep='\n')
-    plt.scatter(X_test, y_test, color ='b')
-    plt.plot(X_test, y_pred, color ='k')
+    print('predicted response:', y_pred, sep='\n')
     
-    plt.show()
+    # Graphs
+    # plt.scatter(X_test, y_test, color ='b')
+    # plt.plot(X_test, y_pred, color ='k')
+    
+    # plt.show()
 
     print(model.score(X_test, y_test))
 
