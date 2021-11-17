@@ -6,7 +6,7 @@ import re
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def run_graphs(r_sq,x,slope, intercept):
+def run_graphs(r_sq,x,slope, intercept, text_file):
     rootURL = 'https://www.pro-football-reference.com/'
     playerURL_list = []
     player_list = []
@@ -20,7 +20,8 @@ def run_graphs(r_sq,x,slope, intercept):
         return tag_re.sub('', str(text))
 
     url = 'https://www.pro-football-reference.com/years/2018/scrimmage.htm'
-    ## Scrape for RB stats
+    
+    # Scrape for RB stats
     res = requests.get(url)
     soup = BeautifulSoup(res.text,features="html.parser")
 
@@ -43,7 +44,8 @@ def run_graphs(r_sq,x,slope, intercept):
     for i in table:
         player_list.append(list(i))
 
-    with open('Projected_Season.csv',mode='r') as flex:
+    # Save Projected Plus Actual Fantasy Points For The 2018 Season
+    with open('Projected_Season_'+text_file+'.csv',mode='r') as flex:
         data = []
         reader = csv.reader(flex, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL,lineterminator = '\n')
         with open('2018.csv',mode='w') as evaluate:
@@ -69,8 +71,6 @@ def run_graphs(r_sq,x,slope, intercept):
                         data.append(difference)
                         data.append(percent_difference)
                         writer.writerow(data)
-                    else:
-                        continue
 
     dataset = pd.read_csv("2018.csv", sep=",",names=['Names', 'Projected','Actual', 'Difference','Percent Difference'], header=None)
 
