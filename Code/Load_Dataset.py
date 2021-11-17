@@ -1,38 +1,50 @@
 # Add Imports
 import pandas as pd
 import numpy as np
-import pickle
 from sklearn.preprocessing import LabelEncoder
 # Label Encoder Is Used To Convert Strings To Integers
 # EX. The String "QB" Is Set To Integer 15
 
-def dataset():
+# Currently Used Dataset
+def Train_Dataset():
     train_data = pd.read_csv("train.csv", sep=",")
 
     # Initialize List To Store Columns Encoded
-    le_labels= []
+    train_le_labels= []
 
     # Loops Through Dataframe Columns And Apply Label Encoder Onto Any Columns With Strings Indexes
     for z in train_data.columns:
         if type(train_data.loc[0,z]) == str:
             le = LabelEncoder()
             train_data[z] = le.fit_transform(train_data[z])
-            le_labels.append(z)
+            train_le_labels.append(z)
 
             # Saved Label Encoder For Later Use (To Decode Any Integer To It's Original String)
-            np.save('Dataset/Encoder/classes_'+str(z)+'.npy', le.classes_)
-
-        # print(str(z)+' == ' + str(dataset.loc[0,z]))
+            np.save('Dataset/Encoder/classes_'+'train_'+str(z)+'.npy', le.classes_)
     print('')
 
-    # for xs in le_labels:
-    #     encoder = LabelEncoder()
-    #     encoder.classes_ = np.load('classes_'+str(xs)+'.npy',allow_pickle=True)
-    #     dataset[xs] = encoder.inverse_transform(dataset[xs])
-    #     # print(str(xs)+' == ' + str(dataset.loc[0,xs]))    
+    return train_data, train_le_labels
     
-    return train_data, le_labels
-    
+def Test_Dataset():
+    test_data = pd.read_csv("test.csv", sep=",")
+
+    # Initialize List To Store Columns Encoded
+    test_le_labels= []
+
+    # Loops Through Dataframe Columns And Apply Label Encoder Onto Any Columns With Strings Indexes
+    for z in test_data.columns:
+        if type(test_data.loc[0,z]) == str:
+            le = LabelEncoder()
+            test_data[z] = le.fit_transform(test_data[z])
+            test_le_labels.append(z)
+
+            # Saved Label Encoder For Later Use (To Decode Any Integer To It's Original String)
+            np.save('Dataset/Encoder/classes_'+'test_'+str(z)+'.npy', le.classes_)
+    print('')
+
+    return test_data, test_le_labels
+
+# Different Dataset That Was Used For Testing Algorithms
 # Returns Dataset And List Of Columns Encoded
 def get_data():
     # Grab Dataset And Store It Onto A Pandas Dataframe
@@ -67,7 +79,7 @@ def get_data():
     
     return dataset, le_labels
 
-dataset()
+Test_Dataset()
 
 
 
