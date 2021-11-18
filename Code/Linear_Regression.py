@@ -38,7 +38,7 @@ def create_model(train_dataset, test_dataset,test_le_labels):
 
     # Predict
     y_pred = model.predict(x_test_data)
-    print('predicted response:', y_pred, sep='\n')
+    #print('predicted response:', y_pred, sep='\n')
 
     # Used To Decode Label Encoder Based On Columns Encoded
     for xs in test_le_labels:
