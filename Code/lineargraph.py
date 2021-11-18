@@ -6,7 +6,7 @@ import re
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def run_graphs(r_sq,x,slope, intercept, text_file):
+def run_graphs(r_sq,x,slope, intercept, text_file, names):
     rootURL = 'https://www.pro-football-reference.com/'
     playerURL_list = []
     player_list = []
@@ -48,7 +48,7 @@ def run_graphs(r_sq,x,slope, intercept, text_file):
     with open('Projected_Season_'+text_file+'.csv',mode='r') as flex:
         data = []
         reader = csv.reader(flex, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL,lineterminator = '\n')
-        with open('2018.csv',mode='w') as evaluate:
+        with open('2018_'+text_file+'.csv',mode='w') as evaluate:
             writer = csv.writer(evaluate,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL,lineterminator = '\n')
             for row in reader:
                 name = row[0]
@@ -72,19 +72,32 @@ def run_graphs(r_sq,x,slope, intercept, text_file):
                         data.append(percent_difference)
                         writer.writerow(data)
 
-    dataset = pd.read_csv("2018.csv", sep=",",names=['Names', 'Projected','Actual', 'Difference','Percent Difference'], header=None)
+    dataset = pd.read_csv("2018_"+text_file+".csv", sep=",",names=['Names', 'Projected','Actual', 'Difference','Percent Difference'], header=None)
 
     dataset= pd.DataFrame(dataset)
     print(dataset)
 
-    y = intercept + slope * x
+    y = intercept + 5 * x
 
     # Graphs
-    plt.scatter(dataset.iloc[:,2], dataset.iloc[:,1], color ='b')
+    # Red Is Projected Line
+    plt.scatter(dataset.iloc[:,1], dataset.iloc[:,1], color ='r')
+    # Blue Is Actual vs Projected
+    plt.scatter(dataset.iloc[:,2], dataset.iloc[:,1], color ='b', label='Actual vs Projected')
 
-    for i,txt in enumerate(dataset.iloc[:,0]):
-        plt.annotate(txt, (dataset.iloc[:,2][i], dataset.iloc[:,1][i]))
+    # If True, Plot Names
+    if names:
+        # Names On Scatter Plot
+        for i,txt in enumerate(dataset.iloc[:,0]):
+            plt.annotate(txt, (dataset.iloc[:,2][i], dataset.iloc[:,1][i]))
+        for i,txt in enumerate(dataset.iloc[:,0]):
+            plt.annotate(txt, (dataset.iloc[:,1][i], dataset.iloc[:,1][i]))
+
+    # Creates Line To     
+    plt.plot([dataset.iloc[:,2], dataset.iloc[:,1]], [dataset.iloc[:,1], dataset.iloc[:,1]], 'black') 
 
     plt.xlabel('Actual')
     plt.ylabel('Projected')
+    plt.title('Actual vs Projected Graph For '+text_file)
+    plt.legend()
     plt.show()                    
