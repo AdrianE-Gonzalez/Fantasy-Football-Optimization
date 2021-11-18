@@ -6,8 +6,7 @@ import csv
 
 # Create Model
 def create_model(train_dataset, test_dataset,test_le_labels):
-    print(train_dataset)
-    print(test_dataset)
+
     # Split Dataset Into Training And Testing
     train=train_dataset.sample(frac=0.8,random_state=200) #random state is a seed value
     test=train_dataset.drop(train.index)
@@ -39,7 +38,7 @@ def create_model(train_dataset, test_dataset,test_le_labels):
     print('slope:', slope)
     # Predict
     y_pred = model.predict(x_test_data)
-    print('predicted response:', y_pred, sep='\n')
+    # print('predicted response:', y_pred, sep='\n')
 
     # Used To Decode Label Encoder Based On Columns Encoded
     for xs in test_le_labels:
