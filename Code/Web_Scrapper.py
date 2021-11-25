@@ -229,6 +229,6 @@ def get_active_player_career(year_num):
         # Checks If Table Isn't Empty
         # If The Length Is Equal 0, Then Its Considered False.
         if len(table):
-            table.to_csv('train.csv', mode='a', header=False, index=False)
+            table.to_csv('train_'+str(year_num)+'.csv', mode='a', header=False, index=False)
 
         z=z+1
