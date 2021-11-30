@@ -7,7 +7,9 @@ import re
 
 import pandas as pd
 import numpy as np
+import os 
 
+# Gets All
 def get_active_player_career(year_num):
     rootURL = 'https://www.pro-football-reference.com/'
     playerURL_list = []
@@ -78,7 +80,7 @@ def get_active_player_career(year_num):
         # pos=''#str(content_.contents[2])[2:4] if str(content_.contents[2])[2:4]  else ''
         # print(pos)
 
-        # Parsed Checks For Rushing and Receiving Tables, Else Checks For Receiving and Rushing Tables Else Makes Parsed A String
+        # Parsed Checks For Rushing and Receiving Tables, Else Checks For Receiving and Rushing Tables Else Makes Parsed A String Variable
         parsed = (soup.findAll(
             'table', {
                 'id': 'rushing_and_receiving'
@@ -98,6 +100,7 @@ def get_active_player_career(year_num):
         )) else ''
         
         # If There's No Data, Returns Empty Lists
+        # Some Players Are Listed As Active, But Don't Have Any Rushing & Receiving Stats
         if parsed == '' :
             return [],[]
 
@@ -110,41 +113,53 @@ def get_active_player_career(year_num):
         # Gets The Labels From The Table
         labels_ = parsed[0].findAll('thead')
         labels_ = labels_[0].findAll('th')
-        labels_names=[]
+
+        # Gets The Years
+        # Used This In Order To Determine What Year To Drop Based On Year We Are Trying To Get
+        #       Ex. If We Want 2018, We Make Sure To Drop Every Year After That; Only If The Player Has Stats After 2018
+        year_ = parsed[0].findAll('tbody')
+        year_= (year_[0].findAll('th'))
 
         # Initialized Variables
         grouped_rows = []
         col_len=0
         temp= []
-        gnt=0
-
-        # Stores Labels
-        for x in labels_:
-            labels_names.append(x)
 
         # Strips Labels HTML Code
         table_labels_ = [map(lambda x: _strip_html(x), row) for row in labels_]
         table_labels = []
 
+        years_p = [map(lambda x: _strip_html(x), row) for row in year_]
+        years_played_ = []
+
         # Obtains The String Value From The tabel_labels_
         for x in table_labels_:
             temp = list(x)
-            temp =  temp[0] if len(temp)==1 else 'None'
+            temp =  temp[0] if len(temp)!=0 else 'None'
             table_labels.append(temp)
+
+        # Obtains The String Value From The years_p
+        # Added Another If Statement To temp Variable, Because Players Such As Amari Cooper Changed Teams In The Middle Of The Season, 
+        # But Contains An * For The Year, Instead Of An Empty String; Which Just Means He Was Selected For The ProBowl That Year
+        for x in years_p:
+            temp = list(x)
+            temp =  (temp[0] if str(temp[0])!='*' else years_played_[-1])if len(temp)!=0 else years_played_[-1]
+            years_played_.append(temp)
 
         # Turns table_labels Into A DataFrame
         table_labels = pd.DataFrame(table_labels).transpose()
         
-        # Keeps Track If Table Is Rushing/Recieving Or Recieving/Rushing
-        rushing_recieving = []
-        rushing_recieving.append(table_labels.iloc[0,2])
-        rushing_recieving.append(table_labels.iloc[0,3])
+        # Keeps Track If Table Is Rushing/Receiving Or Receiving/Rushing
+        # Used To Convert Receiving & Rushing Tables into Rushing & Receiving Table
+        rushing_receiving = []
+        rushing_receiving.append(table_labels.iloc[0,2])
+        rushing_receiving.append(table_labels.iloc[0,3])
         
         # Temp Variable; Created This Because I Used The Same Variable For Looping And Changing Data During The Foreach Loop
         tempo = table_labels
 
-        # Drop Columns Before The Age Column
-        # Year Column Isn't Stored Under tbody From The HTML Code
+        # Drops Columns Before The Age Column
+        # Year Column Isn't Stored Under tbody From The HTML Code So We Dont Need That Label
         for x in tempo.columns:
             if tempo.iloc[0,x] == 'Age' :
                 break
@@ -152,31 +167,22 @@ def get_active_player_career(year_num):
                 table_labels = table_labels.drop(columns=[x])
 
         # Gets The Length Of table_labels
+        # We Do this Because Some Players Doesn't Contain The AV Column
         column_len = table_labels.shape[1]-1
         temp= []
 
         for i in rows:
-            # If Statements Specifically Fixes Table Shifts
-            # Did Multiple If Statements So It Would Be Legible
-
+            # If Player Missed Season, Adds 0s To The Row
             # Else, Stores Each Data Upto The column_len; Then Starts A New Row In The Table
-            if str(i)=='<td class="center" colspan="30" data-stat="reason">Missed season - Contract dispute</td>':
+            if str(i).find('Missed season') > -1:
                 temp= temp[:-1]
-                col_len-=1
-            elif str(i)=='<td class="center" colspan="30" data-stat="reason">Missed season - Violation of league substance abuse policy</td>':
-                temp= temp[:-1]
-                col_len-=1
-            elif str(i)=='<td class="center" colspan="30" data-stat="reason">Missed season - Retired</td>':
-                temp= temp[:-1]
-                col_len-=1
-            elif str(i)=='<td class="center" colspan="30" data-stat="reason">Missed season - Injured (broken ankle)</td>':
-                temp= temp[:-1]
-                col_len-=1
-            elif str(i)=='<td class="center" colspan="30" data-stat="reason">Missed season - Injured (ankle)</td>':
-                temp= temp[:-1]
+                zeroes= [0] * column_len
+                grouped_rows.append(zeroes)
                 col_len-=1
             else:
                 temp.append(str(i))
+                # If The col_len Is Equal To column_len, Then It Appends The Row Onto The grouped_rows And Resets col_len To 0
+                # Else It Adds 1 To col_len
                 if col_len == column_len:
                     grouped_rows.append(temp)
                     col_len=0
@@ -204,9 +210,28 @@ def get_active_player_career(year_num):
 
         # Converts player_career Into A DataFrame
         player_career = pd.DataFrame(player_career)
+        temp_year=years_played_
+        # Adds Player Name To The Beginning Of The Table
         player_career.insert(loc=0, column='Player', value=name)
-        print(player_career)
+        # Adds Year To The Second Column Of The Table
+        player_career.insert(loc=1, column='Year', value=temp_year)
 
+        # Checks If The Table Is Receiving & Rushing
+        # Changes Stats Order From Receiving & Rushing To Rushing & Receiving
+        if rushing_receiving[0]=='Receiving':
+            Temp= pd.concat([player_career.iloc[:,:7],player_career.iloc[:,18:26],player_career.iloc[:,7:18],player_career.iloc[:,26:]], axis=1)
+            player_career = Temp
+        
+        # Keeps Track Of The Year Its Currently Checking
+        curr_year = years_played_[-1]
+        
+        # Loops Through The Years And Drops Any Year After The year_num
+        # This Is Meant To Drop The Stats After The year_num That Current Active Players Are Still Playing In The NFL After The Year Num
+        while str(curr_year) != str(year_num):
+            player_career= player_career.iloc[:-1, :]
+            years_played_= years_played_[:-1]
+            curr_year=years_played_[-1]
+        print(player_career)
         return player_career, table_labels
 
 
@@ -214,9 +239,11 @@ def get_active_player_career(year_num):
     temp_name = player_list.iloc[0,0].replace("*","")
     table, labels = player_fetch(0,temp_name)
     labels= labels.values.tolist()[0]
+    labels.insert(0,'Player Name')
+    labels.insert(1,'Year')
 
     # Gather training data
-    with open('train_'+str(year_num)+'.csv',mode='w') as train:
+    with open('./Dataset/raw_data_'+str(year_num)+'.csv',mode='w') as train:
         writer = csv.writer(train, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
         writer.writerow(labels)
 
@@ -229,6 +256,13 @@ def get_active_player_career(year_num):
         # Checks If Table Isn't Empty
         # If The Length Is Equal 0, Then Its Considered False.
         if len(table):
-            table.to_csv('train_'+str(year_num)+'.csv', mode='a', header=False, index=False)
+            table.to_csv('./Dataset/raw_data_'+str(year_num)+'.csv', mode='a', header=False, index=False)
 
         z=z+1
+
+# You Only Need To Do This Once, Unless You Want To Get The Upcoming Season
+get_active_player_career(2017)
+get_active_player_career(2018)
+get_active_player_career(2019)
+get_active_player_career(2020)
+get_active_player_career(2021)
