@@ -6,8 +6,9 @@ from sklearn.preprocessing import LabelEncoder
 # EX. The String "QB" Is Set To Integer 15
 
 # Currently Used Dataset
-def Train_Dataset():
-    train_data = pd.read_csv("train.csv", sep=",")
+def Train_Dataset(year_num):
+    #train_data = pd.read_csv('train.csv', sep=",")
+    train_data = pd.read_csv('./Dataset/Training Datasets/training_dataset_'+str(year_num)+'.csv', sep=",")
 
     # Initialize List To Store Columns Encoded
     train_le_labels= []
@@ -25,8 +26,9 @@ def Train_Dataset():
 
     return train_data, train_le_labels
     
-def Test_Dataset():
-    test_data = pd.read_csv("test.csv", sep=",")
+def Test_Dataset(year_num):
+    #test_data = pd.read_csv('test.csv', sep=",")
+    test_data = pd.read_csv('./Dataset/Testing Datasets/testing_dataset_'+str(year_num)+'.csv', sep=",")
 
     # Initialize List To Store Columns Encoded
     test_le_labels= []
@@ -79,9 +81,9 @@ def get_data():
     
     return dataset, le_labels
 
-Test_Dataset()
-
-
+def get_raw_data(year):
+    dataset = pd.read_csv('./Dataset/Raw Data/raw_data_'+str(year)+'.csv', sep=",")
+    return dataset
 
 # 6pts per rushing td
 # 4pts per passing td
