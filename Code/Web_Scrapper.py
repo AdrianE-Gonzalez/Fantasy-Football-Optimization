@@ -243,7 +243,7 @@ def get_active_player_career(year_num):
     labels.insert(1,'Year')
 
     # Gather training data
-    with open('./Dataset/raw_data_'+str(year_num)+'.csv',mode='w') as train:
+    with open('./Dataset/Raw Data/raw_data_'+str(year_num)+'.csv',mode='w') as train:
         writer = csv.writer(train, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
         writer.writerow(labels)
 
@@ -256,7 +256,7 @@ def get_active_player_career(year_num):
         # Checks If Table Isn't Empty
         # If The Length Is Equal 0, Then Its Considered False.
         if len(table):
-            table.to_csv('./Dataset/raw_data_'+str(year_num)+'.csv', mode='a', header=False, index=False)
+            table.to_csv('./Dataset/Raw Data/raw_data_'+str(year_num)+'.csv', mode='a', header=False, index=False)
 
         z=z+1
 
