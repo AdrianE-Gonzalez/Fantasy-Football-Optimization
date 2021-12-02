@@ -261,8 +261,8 @@ def get_active_player_career(year_num):
         z=z+1
 
 # You Only Need To Do This Once, Unless You Want To Get The Upcoming Season
-get_active_player_career(2017)
-get_active_player_career(2018)
-get_active_player_career(2019)
-get_active_player_career(2020)
-get_active_player_career(2021)
+# get_active_player_career(2017)
+# get_active_player_career(2018)
+# get_active_player_career(2019)
+# get_active_player_career(2020)
+# get_active_player_career(2021)
